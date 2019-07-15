@@ -11,6 +11,7 @@
 #include <tchar.h>
 
 // Global variables
+#define JMS_NUM_IP_DEVICES 1 // Number of raw input devices we are using
 
 // The main window class name.
 static TCHAR szWindowClass[] = _T("DesktopApp");
@@ -31,9 +32,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
-		// first call to app ends here 
-		// we'll register interest in 3d Mouse events 
+		{
+			// first call to app ends here 
+			// we'll register interest in 3d Mouse events 
+			RAWINPUTDEVICE Rid[JMS_NUM_IP_DEVICES];
+
+			Rid[0].usUsagePage = 0x01;
+			Rid[0].usUsage = 0x08;// DMulti-axis controller
+			Rid[0].dwFlags = 0x00;
+			Rid[0].hwndTarget = 0;
+
+			if (RegisterRawInputDevices(Rid, JMS_NUM_IP_DEVICES, sizeof(Rid[0])) == FALSE) {
+				//registration failed. Call GetLastError for the cause of the error
+			}
+		}
 		break;
+
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 
@@ -51,9 +65,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Do we need to de-register the mouse events?
 		PostQuitMessage(0);
 		break;
-	case WM_INPUT:
-		// Handle raw inputs here eventually
-		break;
+	case WM_INPUT: 
+		{
+			// Handle raw inputs here eventually
+			// based on information in https://docs.microsoft.com/en-us/windows/win32/inputdev/using-raw-input
+			UINT rawInputSize = sizeof(RAWINPUT);
+			RAWINPUT rawInput;
+
+			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &rawInput, &rawInputSize, sizeof(RAWINPUTHEADER));
+
+			if (rawInput.header.dwType == RIM_TYPEHID)
+			{
+				char buffer[256];
+				wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
+					rawInput.data.hid.dwSizeHid,
+					rawInput.data.hid.dwCount,
+					rawInput.data.hid.bRawData[0]);
+				OutputDebugString(buffer);
+
+			}
+			else
+			{
+				// ignore??
+			}
+		}
+
+	break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 		break;
