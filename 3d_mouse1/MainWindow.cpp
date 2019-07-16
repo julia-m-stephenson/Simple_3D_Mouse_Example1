@@ -69,18 +69,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			// Handle raw inputs here eventually
 			// based on information in https://docs.microsoft.com/en-us/windows/win32/inputdev/using-raw-input
-			UINT rawInputSize = sizeof(RAWINPUT);
+		UINT rawInputSize = sizeof(RAWINPUT);
+		UINT returnSize = 0;
+
 			RAWINPUT rawInput;
 
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &rawInput, &rawInputSize, sizeof(RAWINPUTHEADER));
-
+			if ((returnSize=GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &rawInput, &rawInputSize, sizeof(RAWINPUTHEADER))) > sizeof(RAWINPUT))
+			{
+				// Something bad happened
+				char buffer[256];
+				wsprintf(buffer, TEXT(" GetRawInputData: Has overflowed buffer, returnSize=%04x expected size :%04x \n"),
+					returnSize,
+					sizeof(RAWINPUT));
+				OutputDebugString(buffer);
+				PostQuitMessage(0);
+			}
 			if (rawInput.header.dwType == RIM_TYPEHID)
 			{
 				char buffer[256];
-				wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
+				wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x returnSize=%04x \n"),
 					rawInput.data.hid.dwSizeHid,
 					rawInput.data.hid.dwCount,
-					rawInput.data.hid.bRawData[0]);
+					rawInput.data.hid.bRawData[0],
+					returnSize);
 				OutputDebugString(buffer);
 
 			}
@@ -89,7 +100,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				// ignore??
 			}
 		}
-
 	break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
