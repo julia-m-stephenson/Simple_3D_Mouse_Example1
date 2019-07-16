@@ -30,6 +30,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 	TCHAR greeting[] = _T("Hello, Windows desktop!");
+	static short *axisData = NULL;// non-zero indicates display data available
 
 	switch (message)
 	{
@@ -52,13 +53,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-
+#if 0
 		// Here your application is laid out.
 		// For this introduction, we just print out "Hello, Windows desktop!"
 		// in the top left corner.
 		TextOut(hdc,
 			5, 5,
 			greeting, _tcslen(greeting));
+#else
+		/* print null data */
+		TextOut(hdc, 0, 0, _T("Zero Event                  "), 28);
+		//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
+		TextOut(hdc, 15, 100, _T("TX: 0          "), 15);
+		TextOut(hdc, 15, 120, _T("TY: 0          "), 15);
+		TextOut(hdc, 15, 140, _T("TZ: 0          "), 15);
+		TextOut(hdc, 15, 160, _T("RX: 0          "), 15);
+		TextOut(hdc, 15, 180, _T("RY: 0          "), 15);
+		TextOut(hdc, 15, 200, _T("RZ: 0          "), 15);
+		TextOut(hdc, 15, 220, _T(" P: 0          "), 15);
+
+#endif
 		// End application specific layout section.
 
 		EndPaint(hWnd, &ps);
@@ -88,7 +102,46 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			if (rawInput.header.dwType == RIM_TYPEHID)
 			{
-				handle3dMouseEvents(rawInput);
+
+				if (handle3dMouseEvents(rawInput, &axisData) != -1) {
+					// Yay we got something
+					// Update Screen
+					hdc = GetDC(hWnd);
+
+					// This code comes from 3DxTest example 
+					TCHAR buff0[30];                            /* text buffer for TX */
+					TCHAR buff1[30];                            /* text buffer for TY */
+					TCHAR buff2[30];                            /* text buffer for TZ */
+					TCHAR buff3[30];                            /* text buffer for RX */
+					TCHAR buff4[30];                            /* text buffer for RY */
+					TCHAR buff5[30];                            /* text buffer for RZ */
+
+					int len0, len1, len2, len3, len4, len5;	   /* length of each buffer */
+
+															   /* put the actual ball data into the buffers */
+					len0 = wsprintf(buff0, _T("TX: %d         "), axisData[0]);
+					len1 = wsprintf(buff1, _T("TY: %d         "), axisData[1]);
+					len2 = wsprintf(buff2, _T("TZ: %d         "), axisData[2]);
+					len3 = wsprintf(buff3, _T("RX: %d         "), axisData[3]);
+					len4 = wsprintf(buff4, _T("RY: %d         "), axisData[4]);
+					len5 = wsprintf(buff5, _T("RZ: %d         "), axisData[5]);
+
+
+					/* print buffers */
+					TCHAR *buf = _T("Motion Event              ");
+					TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
+					//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
+					TextOut(hdc, 15, 100, buff0, len0);
+					TextOut(hdc, 15, 120, buff1, len1);
+					TextOut(hdc, 15, 140, buff2, len2);
+					TextOut(hdc, 15, 160, buff3, len3);
+					TextOut(hdc, 15, 180, buff4, len4);
+					TextOut(hdc, 15, 200, buff5, len5);
+
+				}
+
+				/*release our window handle */
+				ReleaseDC(hWnd, hdc);
 
 			}
 			else

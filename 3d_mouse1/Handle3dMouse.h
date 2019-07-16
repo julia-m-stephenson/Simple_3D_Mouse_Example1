@@ -1,1 +1,1 @@
-UINT handle3dMouseEvents(RAWINPUT rawInputPacket);
+UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData);

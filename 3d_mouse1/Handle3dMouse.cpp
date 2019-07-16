@@ -10,7 +10,7 @@ static short globalAxis[6] = { 0 };//Full set of ROTATION and Movement
 /////////////////////////////////////////
 // Handling 3D mouse events
 /////////////////////////////////////////
-UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
+UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 {
 	BYTE *pRawData;
 	RID_DEVICE_INFO deviceInfo;
@@ -18,6 +18,8 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 	UINT returnSize = 0;
 
 	char buffer[256];
+
+
 #ifdef JMS_VERBOSE
 	wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
 		rawInputPacket.data.hid.dwSizeHid,
@@ -55,7 +57,7 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 			globalDeviceInfo = deviceInfo;
 			// double check usage matches multi-globalAxis device
 			if ((deviceInfo.hid.usUsage != 0x08) || (deviceInfo.hid.usUsagePage != 0x01)) {
-				return 0;
+				return -1;
 			}
 
 			// decode vendor ids
@@ -119,35 +121,35 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 
 // These are not multi-globalAxis devices so not really interested
 				case 0xC650: //OutputDebugString(TEXT("CadMouse\n"));
-					return 0;
+					return -1;
 					break;
 				case 0xC651: //OutputDebugString(TEXT("CadMouse Wireless\n"));
-					return 0;
+					return -1;
 					break;
 				case 0xC652: //OutputDebugString(TEXT("Universal Receiver\n"));
-					return 0;
+					return -1;
 					break;
 				case 0xC654: //OutputDebugString(TEXT("CadMouse Pro Wireless\n"));
-					return 0;
+					return -1;
 					break;
 				case 0xC657: //OutputDebugString(TEXT("CadMouse Pro Wireless Left\n"));
-					return 0;
+					return -1;
 					break;
 				default:
-					return 0;
+					return -1;
 					break;
 				}
 			}
 			else {
 				// Unrecognised device
-				return 0;
+				return -1;
 			}
 
 		}
 		else
 		{
 			// ignore??
-			return 0;
+			return -1;
 		}
 
 	}
@@ -200,6 +202,6 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 		globalAxis[4],
 		globalAxis[5]);
 	OutputDebugString(buffer);
-
-	return 0;
+	*axisData = globalAxis;
+	return 0;// valid data
 }
