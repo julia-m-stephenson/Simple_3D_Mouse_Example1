@@ -18,7 +18,7 @@
 static TCHAR szWindowClass[] = _T("DesktopApp");
 
 // The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("Windows Desktop Guided Tour Application");
+static TCHAR szTitle[] = _T("Julia's Minimal Criminal 3D Mouse example");
 
 HINSTANCE hInst;
 
@@ -53,16 +53,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-#if 0
-		// Here your application is laid out.
-		// For this introduction, we just print out "Hello, Windows desktop!"
-		// in the top left corner.
-		TextOut(hdc,
-			5, 5,
-			greeting, _tcslen(greeting));
-#else
 		/* print null data */
-		TextOut(hdc, 0, 0, _T("Zero Event                  "), 28);
+		TextOut(hdc, 0, 0, _T("Initialise                  "), 28);
 		//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
 		TextOut(hdc, 15, 100, _T("TX: 0          "), 15);
 		TextOut(hdc, 15, 120, _T("TY: 0          "), 15);
@@ -71,8 +63,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		TextOut(hdc, 15, 180, _T("RY: 0          "), 15);
 		TextOut(hdc, 15, 200, _T("RZ: 0          "), 15);
 		TextOut(hdc, 15, 220, _T(" P: 0          "), 15);
-
-#endif
 		// End application specific layout section.
 
 		EndPaint(hWnd, &ps);
