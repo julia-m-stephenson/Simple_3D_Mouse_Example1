@@ -6,7 +6,7 @@
 // Globals
 /////////////////////////////////////////
 static RID_DEVICE_INFO globalDeviceInfo = { 0 };
-
+static short globalAxis[6] = { 0 };//Full set of ROTATION and Movement 
 /////////////////////////////////////////
 // Handling 3D mouse events
 /////////////////////////////////////////
@@ -18,12 +18,13 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 	UINT returnSize = 0;
 
 	char buffer[256];
+#ifdef JMS_VERBOSE
 	wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
 		rawInputPacket.data.hid.dwSizeHid,
 		rawInputPacket.data.hid.dwCount,
 		rawInputPacket.data.hid.bRawData[0]);
 	OutputDebugString(buffer);
-
+#endif
 	// Lets have a look at the device info
 	// Blender only does this once which makes sense we want to make the event loop as lean as possible
 	if ((returnSize = GetRawInputDeviceInfo(rawInputPacket.header.hDevice, RIDI_DEVICEINFO, &deviceInfo, &deviceInfoSize)) > sizeof(RID_DEVICE_INFO))
@@ -41,6 +42,7 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 		if (deviceInfo.dwType == RIM_TYPEHID)
 		{
 			// Phew it _is_ a HID device not a smelly old keyboard or normal mouse
+#ifdef JMS_VERBOSE
 			wsprintf(buffer, TEXT(" HID Info: dwVendorId=0x%04x dwProductId:0x%04x dwVersionNumber:0x%04x usUsage:0x%02x usUsagePage:0x%02x \n"),
 				deviceInfo.hid.dwVendorId,
 				deviceInfo.hid.dwProductId,
@@ -48,15 +50,17 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 				deviceInfo.hid.usUsage,
 				deviceInfo.hid.usUsagePage);
 			OutputDebugString(buffer);
+#endif
 			// Save device info for later
 			globalDeviceInfo = deviceInfo;
+			// double check usage matches multi-globalAxis device
+			if ((deviceInfo.hid.usUsage != 0x08) || (deviceInfo.hid.usUsagePage != 0x01)) {
+				return 0;
+			}
+
 			// decode vendor ids
 			// based on https://www.3dconnexion.co.uk/nc/service/faqs/faq/how-can-i-check-if-my-usb-3d-mouse-is-recognized-by-windows.html
-			deviceInfo.hid.dwVendorId;
-			deviceInfo.hid.dwProductId;
-			deviceInfo.hid.dwVersionNumber;
-			deviceInfo.hid.usUsage;
-			deviceInfo.hid.usUsagePage;
+			
 			if (deviceInfo.hid.dwVendorId == 0x046D)
 			{
 				// Logitech VendorId (Have to be careful as loads of meeces use this)
@@ -76,7 +80,10 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 					break;
 				case 0xC623: OutputDebugString(TEXT("SpaceTraveler\n"));
 					break;
-				case 0xC625: OutputDebugString(TEXT("SpacePilot\n"));
+				case 0xC625: 
+#ifdef JMS_VERBOSE
+					OutputDebugString(TEXT("SpacePilot\n"));
+#endif
 					break;
 // Newer Devices have a standardised Key Mapping which makes things easier
 				case 0xC626: OutputDebugString(TEXT("SpaceNavigator\n"));
@@ -109,23 +116,33 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 					break;
 				case 0xC635: OutputDebugString(TEXT("SpaceMouse Compact\n"));
 					break;
-#if 0
-// These are not multi-axis devices so not really interested
-				case 0xC650: OutputDebugString(TEXT("CadMouse\n"));
+
+// These are not multi-globalAxis devices so not really interested
+				case 0xC650: //OutputDebugString(TEXT("CadMouse\n"));
+					return 0;
 					break;
-				case 0xC651: OutputDebugString(TEXT("CadMouse Wireless\n"));
+				case 0xC651: //OutputDebugString(TEXT("CadMouse Wireless\n"));
+					return 0;
 					break;
-				case 0xC652: OutputDebugString(TEXT("Universal Receiver\n"));
+				case 0xC652: //OutputDebugString(TEXT("Universal Receiver\n"));
+					return 0;
 					break;
-				case 0xC654: OutputDebugString(TEXT("CadMouse Pro Wireless\n"));
+				case 0xC654: //OutputDebugString(TEXT("CadMouse Pro Wireless\n"));
+					return 0;
 					break;
-				case 0xC657: OutputDebugString(TEXT("CadMouse Pro Wireless Left\n"));
+				case 0xC657: //OutputDebugString(TEXT("CadMouse Pro Wireless Left\n"));
+					return 0;
 					break;
-#endif
 				default:
+					return 0;
 					break;
 				}
 			}
+			else {
+				// Unrecognised device
+				return 0;
+			}
+
 		}
 		else
 		{
@@ -134,7 +151,55 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket)
 		}
 
 	}
+	// If we got this far is a device we support !!
 	// Process data
+	// This is based on code from TranslateRawInputData (rawinput.hpp) provided as part of the 
+	// 3D Connexions S3DM_SDK_v2-0-4_r7688_raw_input example
 	pRawData = rawInputPacket.data.hid.bRawData;
+	if (pRawData[0] == 0x01) // Translation vector
+	{
+		// this is x,y,z 16 bit number 
+		short* pTranslationData = (short*)(&rawInputPacket.data.hid.bRawData[1]);
+		// Cache the pan zoom data
+		globalAxis[0] = (pTranslationData[0]);
+		globalAxis[1] = (pTranslationData[1]);
+		globalAxis[2] = (pTranslationData[2]);
+		// Check if we have a Rotation information in same packet
+		if (rawInputPacket.data.hid.dwSizeHid >= 13) // Highspeed package
+		{
+			// Cache the rotation data
+			globalAxis[3] = (pTranslationData[3]);
+			globalAxis[4] = (pTranslationData[4]);
+			globalAxis[5] = (pTranslationData[5]);
+			//deviceData.isDirty = true;????
+		}
+
+
+	}
+	else if (pRawData[0] == 0x02)  // Rotation vector
+	{
+		// this is x,y,z 16 bit number 
+		short* pRotationData = (short*)(&rawInputPacket.data.hid.bRawData[1]);
+		// Cache the pan zoom data
+		globalAxis[3] = (pRotationData[0]);
+		globalAxis[4] = (pRotationData[1]);
+		globalAxis[5] = (pRotationData[2]);
+	}
+	else if (pRawData[0] == 0x03)  // Keystate change
+	{
+
+	}
+	else {
+
+	}
+	wsprintf(buffer, TEXT(" Vector Info: TX:%06d TY:%06d TZ:%06d RX:%06d RY:%06d RZ:%06d  \n"),
+		globalAxis[0],
+		globalAxis[1],
+		globalAxis[2],
+		globalAxis[3],
+		globalAxis[4],
+		globalAxis[5]);
+	OutputDebugString(buffer);
+
 	return 0;
 }
