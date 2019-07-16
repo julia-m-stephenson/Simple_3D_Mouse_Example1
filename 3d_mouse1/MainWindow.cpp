@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
+#include "Handle3dMouse.h"
 
 // Global variables
 #define JMS_NUM_IP_DEVICES 1 // Number of raw input devices we are using
@@ -21,6 +22,7 @@ static TCHAR szTitle[] = _T("Windows Desktop Guided Tour Application");
 
 HINSTANCE hInst;
 
+/////////////////////////////////////////
 //Event handling here 
 //define first as refereenced by main 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -69,8 +71,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			// Handle raw inputs here eventually
 			// based on information in https://docs.microsoft.com/en-us/windows/win32/inputdev/using-raw-input
-		UINT rawInputSize = sizeof(RAWINPUT);
-		UINT returnSize = 0;
+			UINT rawInputSize = sizeof(RAWINPUT);
+			UINT returnSize = 0;
 
 			RAWINPUT rawInput;
 
@@ -86,13 +88,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			if (rawInput.header.dwType == RIM_TYPEHID)
 			{
-				char buffer[256];
-				wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x returnSize=%04x \n"),
-					rawInput.data.hid.dwSizeHid,
-					rawInput.data.hid.dwCount,
-					rawInput.data.hid.bRawData[0],
-					returnSize);
-				OutputDebugString(buffer);
+				handle3dMouseEvents(rawInput);
 
 			}
 			else
