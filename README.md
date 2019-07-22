@@ -20,6 +20,9 @@ The layout of motion data in the window has been lifted from the current 3DxWare
 Most of the information (but no tthe code) has come from their very early S3DM_SDK_v2-0-4_r7688_raw_input - s3dm_viewer sample code.
 A great deal of insight came from looking at the Source of Blender App:-
 https://git.blender.org/gitweb/gitweb.cgi/blender.git/blob/HEAD:/intern/ghost/intern/GHOST_NDOFManager.cpp
+The Keymap tables also come from S3DM_SDK_v2-0-4_r7688_raw_input 
+
+V3DKey.h - is taken directly from the 3D Connexions SDK (3DxWare_SDK)
 
 Things left to do:-
 

@@ -114,7 +114,9 @@
     <ClCompile Include="Handle3dMouse.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="KeyMap3dMouse.h" />
     <ClInclude Include="Handle3dMouse.h" />
+    <ClInclude Include="V3DKey.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

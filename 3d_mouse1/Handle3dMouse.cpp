@@ -2,11 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
+#include "V3DKey.h"
+#include "keyMap3dMouse.h"
+
 /////////////////////////////////////////
 // Globals
 /////////////////////////////////////////
 static RID_DEVICE_INFO globalDeviceInfo = { 0 };
 static short globalAxis[6] = { 0 };//Full set of ROTATION and Movement 
+static const V3DKey * currentKeyMap = NULL;// pointer to current map
+static short currentKeyMapSize = 0; // number of elemements of the above
+
 /////////////////////////////////////////
 // Handling 3D mouse events
 /////////////////////////////////////////
@@ -83,9 +89,9 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 				case 0xC623: OutputDebugString(TEXT("SpaceTraveler\n"));
 					break;
 				case 0xC625: 
-#ifdef JMS_VERBOSE
 					OutputDebugString(TEXT("SpacePilot\n"));
-#endif
+					currentKeyMap = spacePilotKeys;
+					currentKeyMapSize = sizeof(spacePilotKeys) / sizeof(V3DKey);
 					break;
 // Newer Devices have a standardised Key Mapping which makes things easier
 				case 0xC626: OutputDebugString(TEXT("SpaceNavigator\n"));
@@ -189,7 +195,27 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 	}
 	else if (pRawData[0] == 0x03)  // Keystate change
 	{
+		if ((currentKeyMap != NULL) && (currentKeyMapSize != 0)) {
+			short sKeyData = *(short*)(&rawInputPacket.data.hid.bRawData[1]);
+			short mask = 0x0001;
+			short i;
+			for (i = 1; i < currentKeyMapSize; i++) {
+				if ((mask&sKeyData) == mask) {
+					// mask set
+					wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x  \n"),
+						sKeyData,
+						currentKeyMapSize,
+						i,
+						currentKeyMap[i]
+					);
+					OutputDebugString(buffer);
+					break;
+				} 
+				mask = mask << 1;
+			}
 
+
+		}
 	}
 	else {
 

@@ -26,5 +26,11 @@
     <ClInclude Include="Handle3dMouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="V3DKey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyMap3dMouse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
