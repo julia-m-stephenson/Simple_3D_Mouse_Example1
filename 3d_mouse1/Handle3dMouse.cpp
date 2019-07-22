@@ -196,9 +196,9 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 	else if (pRawData[0] == 0x03)  // Keystate change
 	{
 		if ((currentKeyMap != NULL) && (currentKeyMapSize != 0)) {
-			short sKeyData = *(short*)(&rawInputPacket.data.hid.bRawData[1]);
-			short mask = 0x0001;
-			short i;
+			INT32 sKeyData = *(INT32*)(&rawInputPacket.data.hid.bRawData[1]);
+			INT32 mask = 0x0001;
+			INT16 i;
 			if (sKeyData != 0x000) {
 				for (i = 1; i < currentKeyMapSize; i++) {
 					if ((mask&sKeyData) == mask) {
