@@ -95,14 +95,24 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 					break;
 // Newer Devices have a standardised Key Mapping which makes things easier
 				case 0xC626: OutputDebugString(TEXT("SpaceNavigator\n"));
+					currentKeyMap = spaceNavigatorKeys;
+					currentKeyMapSize = sizeof(spaceNavigatorKeys) / sizeof(V3DKey);
 					break;
 				case 0xC627: OutputDebugString(TEXT("SpaceExplorer\n"));
+					currentKeyMap = spaceExplorerKeys;
+					currentKeyMapSize = sizeof(spaceExplorerKeys) / sizeof(V3DKey);
 					break;
 				case 0xC628: OutputDebugString(TEXT("SpaceNavigator for Notebooks\n"));
+					currentKeyMap = spaceNavigatorKeys;
+					currentKeyMapSize = sizeof(spaceNavigatorKeys) / sizeof(V3DKey);
 					break;
 				case 0xC629: OutputDebugString(TEXT("SpacePilot Pro\n"));
+					currentKeyMap = spacePilotProKeys;
+					currentKeyMapSize = sizeof(spacePilotProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC62B: OutputDebugString(TEXT("SpaceMouse Pro\n"));
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);					
 					break;
 				default:
 					break;
@@ -113,16 +123,28 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 				switch (deviceInfo.hid.dwProductId) {
 // More modern devices also used standard key mapping
 				case 0xC62E: OutputDebugString(TEXT("SpaceMouse Wireless (cabled)\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 				case 0xC62F: OutputDebugString(TEXT("SpaceMouse Wireless Receiver\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 				case 0xC631: OutputDebugString(TEXT("SpaceMouse Pro Wireless (cabled)\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 				case 0xC632: OutputDebugString(TEXT("SpaceMouse Pro Wireless Receiver\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 				case 0xC633: OutputDebugString(TEXT("SpaceMouse Enterprise\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 				case 0xC635: OutputDebugString(TEXT("SpaceMouse Compact\n"));
+					currentKeyMap = spaceModern;
+					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
 					break;
 
 // These are not multi-globalAxis devices so not really interested
