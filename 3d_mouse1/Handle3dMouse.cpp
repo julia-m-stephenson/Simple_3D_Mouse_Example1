@@ -199,19 +199,22 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 			short sKeyData = *(short*)(&rawInputPacket.data.hid.bRawData[1]);
 			short mask = 0x0001;
 			short i;
-			for (i = 1; i < currentKeyMapSize; i++) {
-				if ((mask&sKeyData) == mask) {
-					// mask set
-					wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x  \n"),
-						sKeyData,
-						currentKeyMapSize,
-						i,
-						currentKeyMap[i]
-					);
-					OutputDebugString(buffer);
-					break;
-				} 
-				mask = mask << 1;
+			if (sKeyData != 0x000) {
+				for (i = 1; i < currentKeyMapSize; i++) {
+					if ((mask&sKeyData) == mask) {
+						// mask set
+						wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x %s \n"),
+							sKeyData,
+							currentKeyMapSize,
+							i,
+							currentKeyMap[i],
+							keyDebug[currentKeyMap[i]]
+						);
+						OutputDebugString(buffer);
+						break;
+					}
+					mask = mask << 1;
+				}
 			}
 
 
