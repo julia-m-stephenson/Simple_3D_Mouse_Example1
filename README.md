@@ -28,7 +28,6 @@ Things left to do:-
 
 * Add scaling like blender e.g 1/350? So full scale is something like 100% 
 * add deadzone
-* Add key maps 3d connections see info in virtualkeyss.hpp (3d Connexions)
 * change to trace functions for output?
 * change to floats?
 * zero event????
