@@ -62,7 +62,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		TextOut(hdc, 15, 160, _T("RX: 0          "), 15);
 		TextOut(hdc, 15, 180, _T("RY: 0          "), 15);
 		TextOut(hdc, 15, 200, _T("RZ: 0          "), 15);
-		TextOut(hdc, 15, 220, _T(" P: 0          "), 15);
 		// End application specific layout section.
 
 		EndPaint(hWnd, &ps);
@@ -71,7 +70,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// Do we need to de-register the mouse events?
 		PostQuitMessage(0);
 		break;
-	case WM_INPUT: 
+	case WM_INPUT:
 		{
 			// Handle raw inputs here eventually
 			// based on information in https://docs.microsoft.com/en-us/windows/win32/inputdev/using-raw-input
@@ -80,7 +79,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			RAWINPUT rawInput;
 
-			if ((returnSize=GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &rawInput, &rawInputSize, sizeof(RAWINPUTHEADER))) > sizeof(RAWINPUT))
+			if ((returnSize = GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &rawInput, &rawInputSize, sizeof(RAWINPUTHEADER))) > sizeof(RAWINPUT))
 			{
 				// Something bad happened
 				char buffer[256];
@@ -93,50 +92,54 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (rawInput.header.dwType == RIM_TYPEHID)
 			{
 
-				if (handle3dMouseEvents(rawInput, &axisData) != -1) {
-					// Yay we got something
-					// Update Screen
-					hdc = GetDC(hWnd);
+				if (handle3dMouseEvents(rawInput, &axisData) != -1) 
+				{
+					if (axisData != NULL)
+					{
+						// Yay we got something
+						// Update Screen
+						hdc = GetDC(hWnd);
+						// This display code comes from 3DxTest example 
+						TCHAR buff0[30];                            /* text buffer for TX */
+						TCHAR buff1[30];                            /* text buffer for TY */
+						TCHAR buff2[30];                            /* text buffer for TZ */
+						TCHAR buff3[30];                            /* text buffer for RX */
+						TCHAR buff4[30];                            /* text buffer for RY */
+						TCHAR buff5[30];                            /* text buffer for RZ */
 
-					// This code comes from 3DxTest example 
-					TCHAR buff0[30];                            /* text buffer for TX */
-					TCHAR buff1[30];                            /* text buffer for TY */
-					TCHAR buff2[30];                            /* text buffer for TZ */
-					TCHAR buff3[30];                            /* text buffer for RX */
-					TCHAR buff4[30];                            /* text buffer for RY */
-					TCHAR buff5[30];                            /* text buffer for RZ */
+						int len0, len1, len2, len3, len4, len5;	   /* length of each buffer */
 
-					int len0, len1, len2, len3, len4, len5;	   /* length of each buffer */
+																   /* put the actual ball data into the buffers */
+						len0 = wsprintf(buff0, _T("TX: %d         "), axisData[0]);
+						len1 = wsprintf(buff1, _T("TY: %d         "), axisData[1]);
+						len2 = wsprintf(buff2, _T("TZ: %d         "), axisData[2]);
+						len3 = wsprintf(buff3, _T("RX: %d         "), axisData[3]);
+						len4 = wsprintf(buff4, _T("RY: %d         "), axisData[4]);
+						len5 = wsprintf(buff5, _T("RZ: %d         "), axisData[5]);
 
-															   /* put the actual ball data into the buffers */
-					len0 = wsprintf(buff0, _T("TX: %d         "), axisData[0]);
-					len1 = wsprintf(buff1, _T("TY: %d         "), axisData[1]);
-					len2 = wsprintf(buff2, _T("TZ: %d         "), axisData[2]);
-					len3 = wsprintf(buff3, _T("RX: %d         "), axisData[3]);
-					len4 = wsprintf(buff4, _T("RY: %d         "), axisData[4]);
-					len5 = wsprintf(buff5, _T("RZ: %d         "), axisData[5]);
+						/* print buffers */
+						TCHAR *buf = _T("Motion Event              ");
+						TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
+						//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
+						TextOut(hdc, 15, 100, buff0, len0);
+						TextOut(hdc, 15, 120, buff1, len1);
+						TextOut(hdc, 15, 140, buff2, len2);
+						TextOut(hdc, 15, 160, buff3, len3);
+						TextOut(hdc, 15, 180, buff4, len4);
+						TextOut(hdc, 15, 200, buff5, len5);
 
+						/*release our window handle */
+						ReleaseDC(hWnd, hdc);
 
-					/* print buffers */
-					TCHAR *buf = _T("Motion Event              ");
-					TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
-					//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
-					TextOut(hdc, 15, 100, buff0, len0);
-					TextOut(hdc, 15, 120, buff1, len1);
-					TextOut(hdc, 15, 140, buff2, len2);
-					TextOut(hdc, 15, 160, buff3, len3);
-					TextOut(hdc, 15, 180, buff4, len4);
-					TextOut(hdc, 15, 200, buff5, len5);
+					}
 
 				}
 
-				/*release our window handle */
-				ReleaseDC(hWnd, hdc);
 
 			}
 			else
 			{
-				// ignore??
+				// Not a HID event ignore
 			}
 		}
 	break;

@@ -25,7 +25,6 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 
 	char buffer[256];
 
-
 #ifdef JMS_VERBOSE
 	wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
 		rawInputPacket.data.hid.dwSizeHid,
@@ -63,6 +62,8 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 			globalDeviceInfo = deviceInfo;
 			// double check usage matches multi-globalAxis device
 			if ((deviceInfo.hid.usUsage != 0x08) || (deviceInfo.hid.usUsagePage != 0x01)) {
+				currentKeyMap = NULL;
+				currentKeyMapSize = 0;
 				return -1;
 			}
 
@@ -75,18 +76,28 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 				switch (deviceInfo.hid.dwProductId) {
 // Older devices all seem to have different key mappings bit of a pain
 				case 0xC606: OutputDebugString(TEXT("SpaceMouse Classic USB\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 				case 0xC603: OutputDebugString(TEXT("SpaceMouse Plus USB\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 #if 0 // duplicate has same vid/pid
 				case 0xC603: OutputDebugString(TEXT("SpaceMouse Plus XT USB\n"));
 					break;
 #endif
 				case 0xC605: OutputDebugString(TEXT("CadMan\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 				case 0xC621: OutputDebugString(TEXT("SpaceBall 5000 USB\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 				case 0xC623: OutputDebugString(TEXT("SpaceTraveler\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 				case 0xC625: 
 					OutputDebugString(TEXT("SpacePilot\n"));
@@ -115,6 +126,8 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);					
 					break;
 				default:
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					break;
 				}
 			}
@@ -123,53 +136,67 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 				switch (deviceInfo.hid.dwProductId) {
 // More modern devices also used standard key mapping
 				case 0xC62E: OutputDebugString(TEXT("SpaceMouse Wireless (cabled)\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC62F: OutputDebugString(TEXT("SpaceMouse Wireless Receiver\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC631: OutputDebugString(TEXT("SpaceMouse Pro Wireless (cabled)\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC632: OutputDebugString(TEXT("SpaceMouse Pro Wireless Receiver\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC633: OutputDebugString(TEXT("SpaceMouse Enterprise\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 				case 0xC635: OutputDebugString(TEXT("SpaceMouse Compact\n"));
-					currentKeyMap = spaceModern;
-					currentKeyMapSize = sizeof(spaceModern) / sizeof(V3DKey);
+					currentKeyMap = spaceMouseProKeys;
+					currentKeyMapSize = sizeof(spaceMouseProKeys) / sizeof(V3DKey);
 					break;
 
 // These are not multi-globalAxis devices so not really interested
 				case 0xC650: //OutputDebugString(TEXT("CadMouse\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				case 0xC651: //OutputDebugString(TEXT("CadMouse Wireless\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				case 0xC652: //OutputDebugString(TEXT("Universal Receiver\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				case 0xC654: //OutputDebugString(TEXT("CadMouse Pro Wireless\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				case 0xC657: //OutputDebugString(TEXT("CadMouse Pro Wireless Left\n"));
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				default:
+					currentKeyMap = NULL;
+					currentKeyMapSize = 0;
 					return -1;
 					break;
 				}
 			}
 			else {
 				// Unrecognised device
+				currentKeyMap = NULL;
+				currentKeyMapSize = 0;
 				return -1;
 			}
 
@@ -177,6 +204,8 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 		else
 		{
 			// ignore??
+			currentKeyMap = NULL;
+			currentKeyMapSize = 0;
 			return -1;
 		}
 
