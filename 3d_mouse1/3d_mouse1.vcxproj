@@ -117,6 +117,7 @@
     <ClInclude Include="KeyMap3dMouse.h" />
     <ClInclude Include="Handle3dMouse.h" />
     <ClInclude Include="V3DKey.h" />
+    <ClInclude Include="V3DKeyDebug.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

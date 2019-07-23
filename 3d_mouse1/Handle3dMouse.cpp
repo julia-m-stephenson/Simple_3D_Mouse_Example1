@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
-#include "V3DKey.h"
-#include "keyMap3dMouse.h"
+#include "V3DKey.h"// From 3dConnexions
+#include "V3DKeyDebug.h"// My code, Text strings for the above
+#include "KeyMap3dMouse.h"
+#include "Handle3dMouse.h"
 
 /////////////////////////////////////////
 // Globals
@@ -16,15 +18,15 @@ static short currentKeyMapSize = 0; // number of elemements of the above
 /////////////////////////////////////////
 // Handling 3D mouse events
 /////////////////////////////////////////
-UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
+UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData, UINT *key)
 {
 	BYTE *pRawData;
 	RID_DEVICE_INFO deviceInfo;
 	UINT deviceInfoSize = sizeof(RID_DEVICE_INFO);
 	UINT returnSize = 0;
-
+	UINT returnValue = 0;
 	char buffer[256];
-
+	*key = V3DK_INVALID;
 #ifdef JMS_VERBOSE
 	wsprintf(buffer, TEXT(" HID: dwSizeHid=%04x dwCount:%04x bRawData:%04x \n"),
 		rawInputPacket.data.hid.dwSizeHid,
@@ -210,6 +212,10 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 		}
 
 	}
+	else
+	{
+		return -1;// couldn't process message
+	}
 	// If we got this far is a device we support !!
 	// Process data
 	// This is based on code from TranslateRawInputData (rawinput.hpp) provided as part of the 
@@ -232,7 +238,7 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 			globalAxis[5] = (pTranslationData[5]);
 			//deviceData.isDirty = true;????
 		}
-
+		returnValue = H3D_MOTION_EVENT;
 
 	}
 	else if (pRawData[0] == 0x02)  // Rotation vector
@@ -243,14 +249,16 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 		globalAxis[3] = (pRotationData[0]);
 		globalAxis[4] = (pRotationData[1]);
 		globalAxis[5] = (pRotationData[2]);
+		returnValue = H3D_MOTION_EVENT;
 	}
 	else if (pRawData[0] == 0x03)  // Keystate change
 	{
+		INT16 i = 0;// index of key map
 		if ((currentKeyMap != NULL) && (currentKeyMapSize != 0)) {
 			INT32 sKeyData = *(INT32*)(&rawInputPacket.data.hid.bRawData[1]);
 			INT32 mask = 0x0001;
-			INT16 i;
-			if (sKeyData != 0x000) {
+			if (sKeyData != 0x0000) {
+				// Key has been pressed
 				for (i = 1; i < currentKeyMapSize; i++) {
 					if ((mask&sKeyData) == mask) {
 						// mask set
@@ -259,20 +267,22 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 							currentKeyMapSize,
 							i,
 							currentKeyMap[i],
-							keyDebug[currentKeyMap[i]]
+							V3DKeyDebug[currentKeyMap[i]]
 						);
 						OutputDebugString(buffer);
+						*key = currentKeyMap[i];
 						break;
 					}
 					mask = mask << 1;
 				}
 			}
-
-
 		}
+		returnValue = H3D_KEY_EVENT;
 	}
-	else {
-
+	else 
+	{
+		// We don't understand this data type
+		return -1;
 	}
 	wsprintf(buffer, TEXT(" Vector Info: TX:%06d TY:%06d TZ:%06d RX:%06d RY:%06d RZ:%06d  \n"),
 		globalAxis[0],
@@ -283,5 +293,5 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData)
 		globalAxis[5]);
 	OutputDebugString(buffer);
 	*axisData = globalAxis;
-	return 0;// valid data
+	return returnValue;
 }

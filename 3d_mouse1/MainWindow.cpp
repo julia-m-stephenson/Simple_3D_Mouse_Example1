@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
+#include "V3DKey.h"// From 3dConnexions
+#include "V3DKeyDebug.h"// My code, Text strings for the above
 #include "Handle3dMouse.h"
 
 // Global variables
@@ -91,14 +93,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			if (rawInput.header.dwType == RIM_TYPEHID)
 			{
-
-				if (handle3dMouseEvents(rawInput, &axisData) != -1) 
+				UINT returnVal = 0;
+				UINT keyVal = 0;
+				if ((returnVal = handle3dMouseEvents(rawInput, &axisData, &keyVal)) != -1)
 				{
-					if (axisData != NULL)
+					// Yay we got something
+					// Update Screen
+					hdc = GetDC(hWnd);
+					if ((returnVal == H3D_MOTION_EVENT) && (axisData != NULL))
 					{
-						// Yay we got something
-						// Update Screen
-						hdc = GetDC(hWnd);
 						// This display code comes from 3DxTest example 
 						TCHAR buff0[30];                            /* text buffer for TX */
 						TCHAR buff1[30];                            /* text buffer for TY */
@@ -128,10 +131,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						TextOut(hdc, 15, 180, buff4, len4);
 						TextOut(hdc, 15, 200, buff5, len5);
 
-						/*release our window handle */
-						ReleaseDC(hWnd, hdc);
+
+					} 
+					else if (returnVal == H3D_KEY_EVENT)
+					{
+						// This display code comes from 3DxTest example 
+						TCHAR buff0[30];                            /* text buffer for TX */
+						int len0;	   /* length of each buffer */
+
+																   /* put the actual ball data into the buffers */
+						len0 = wsprintf(buff0, _T("Key: %s         "), V3DKeyDebug[keyVal]);
+
+						/* print buffers */
+						TCHAR *buf = _T("Key Event              ");
+						TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
+						//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
+						TextOut(hdc, 15, 220, buff0, len0);
+
 
 					}
+					/*release our window handle */
+					ReleaseDC(hWnd, hdc);
 
 				}
 
