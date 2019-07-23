@@ -262,13 +262,25 @@ UINT handle3dMouseEvents(RAWINPUT rawInputPacket, short **axisData, UINT *key)
 				for (i = 1; i < currentKeyMapSize; i++) {
 					if ((mask&sKeyData) == mask) {
 						// mask set
-						wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x %s \n"),
-							sKeyData,
-							currentKeyMapSize,
-							i,
-							currentKeyMap[i],
-							V3DKeyDebug[currentKeyMap[i]]
-						);
+						if (i < V3DKEYDEBUGSIZE)
+						{
+							wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x %s \n"),
+								sKeyData,
+								currentKeyMapSize,
+								i,
+								currentKeyMap[i],
+								V3DKeyDebug[currentKeyMap[i]]
+							);
+						}
+						else
+						{
+							wsprintf(buffer, TEXT(" sKeyData:0x%04x currentKeyMapSize:%d entry: %d Mapped:0x%04x \n"),
+								sKeyData,
+								currentKeyMapSize,
+								i,
+								currentKeyMap[i]
+							);
+						}
 						OutputDebugString(buffer);
 						*key = currentKeyMap[i];
 						break;

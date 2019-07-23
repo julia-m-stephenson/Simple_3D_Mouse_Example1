@@ -58,12 +58,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		/* print null data */
 		TextOut(hdc, 0, 0, _T("Initialise                  "), 28);
 		//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
-		TextOut(hdc, 15, 100, _T("TX: 0          "), 15);
-		TextOut(hdc, 15, 120, _T("TY: 0          "), 15);
-		TextOut(hdc, 15, 140, _T("TZ: 0          "), 15);
-		TextOut(hdc, 15, 160, _T("RX: 0          "), 15);
-		TextOut(hdc, 15, 180, _T("RY: 0          "), 15);
-		TextOut(hdc, 15, 200, _T("RZ: 0          "), 15);
+		TextOut(hdc, 15, 40, _T("TX: 0          "), 15);
+		TextOut(hdc, 15, 60, _T("TY: 0          "), 15);
+		TextOut(hdc, 15, 80, _T("TZ: 0          "), 15);
+		TextOut(hdc, 15, 100, _T("RX: 0          "), 15);
+		TextOut(hdc, 15, 120, _T("RY: 0          "), 15);
+		TextOut(hdc, 15, 140, _T("RZ: 0          "), 15);
 		// End application specific layout section.
 
 		EndPaint(hWnd, &ps);
@@ -124,29 +124,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						TCHAR *buf = _T("Motion Event              ");
 						TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
 						//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
-						TextOut(hdc, 15, 100, buff0, len0);
-						TextOut(hdc, 15, 120, buff1, len1);
-						TextOut(hdc, 15, 140, buff2, len2);
-						TextOut(hdc, 15, 160, buff3, len3);
-						TextOut(hdc, 15, 180, buff4, len4);
-						TextOut(hdc, 15, 200, buff5, len5);
+						TextOut(hdc, 15, 40, buff0, len0);
+						TextOut(hdc, 15, 60, buff1, len1);
+						TextOut(hdc, 15, 80, buff2, len2);
+						TextOut(hdc, 15, 100, buff3, len3);
+						TextOut(hdc, 15, 120, buff4, len4);
+						TextOut(hdc, 15, 140, buff5, len5);
 
 
 					} 
 					else if (returnVal == H3D_KEY_EVENT)
 					{
 						// This display code comes from 3DxTest example 
-						TCHAR buff0[30];                            /* text buffer for TX */
+						TCHAR buff0[40];                            /* text buffer for TX */
 						int len0;	   /* length of each buffer */
 
 																   /* put the actual ball data into the buffers */
-						len0 = wsprintf(buff0, _T("Key: %s         "), V3DKeyDebug[keyVal]);
+						if (keyVal != 0)
+						{
+							if (keyVal < V3DKEYDEBUGSIZE)
+							{
+								len0 = wsprintf(buff0, _T("Key: %s         "), V3DKeyDebug[keyVal]);
+							}
+							else
+							{
+								len0 = wsprintf(buff0, _T("Key: 0x%x         "), keyVal);
+							}
+						}
+						else
+						{
+							len0 = wsprintf(buff0, _T("Key: %s                   "), "NONE");
+						}
 
 						/* print buffers */
-						TCHAR *buf = _T("Key Event              ");
+						TCHAR *buf = _T("Key Event                  ");
 						TextOut(hdc, 0, 0, buf, (int)_tcslen(buf));
 						//TextOut(hdc, 0, 20, devicename, (int)_tcslen(devicename));
-						TextOut(hdc, 15, 220, buff0, len0);
+						TextOut(hdc, 15, 160, buff0, len0);
 
 
 					}
